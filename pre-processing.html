@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="phyluce v0.1.0 documentation" href="index.html" />
-    <link rel="next" title="&lt;no title&gt;" href="uce-processing.html" />
+    <link rel="next" title="Two roads diverged in a yellow wood" href="next-steps.html" />
     <link rel="prev" title="Study design" href="study-design.html" />
    
   
@@ -37,7 +37,7 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="uce-processing.html" title="&lt;no title&gt;"
+          <a href="next-steps.html" title="Two roads diverged in a yellow wood"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="study-design.html" title="Study design"
@@ -65,16 +65,16 @@ are working.  Thankfully, demultiplexing (or &#8220;demuxing&#8221;) Illumina re
 rather simple. There are several options:</p>
 <ul class="simple">
 <li>the Illumina pipeline</li>
-<li><a href="#id1"><span class="problematic" id="id2">`fastx-tools &lt;&gt;`_</span></a></li>
+<li><a class="reference external" href="http://hannonlab.cshl.edu/fastx_toolkit/">FASTX-toolkit</a></li>
 </ul>
 <p>I have also written <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a>, which is a program to help demultiplex
 Illumina reads.  <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a> is particularly useful when you have very many
 sequence tags (aka &#8220;barcodes&#8221;) to demultiplex, when your sequence tags are
 long, or some combination of the two.</p>
 <p>To demultiplex your data with <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a>, you need a couple of things - first
-you need to <a href="#id3"><span class="problematic" id="id4">`install splitaake &lt;&gt;`_</span></a>.  Second, you need to create a configuration
-file (e.g. my-test-file.conf) for <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a> that relates your sequence tags
-to their samples.  Here  is an example:</p>
+you need to <a href="#id1"><span class="problematic" id="id2">`install splitaake`_</span></a>.  Second, you need to create a configuration
+file (e.g. <tt class="docutils literal"><span class="pre">my-test-file.conf</span></tt>) for <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a> that relates your sequence
+tags to their samples.  Here  is an example:</p>
 <div class="highlight-python"><pre>[L007]
 #name:sequence-tag
 BFIDT-000:AACCGAGTTA
@@ -86,7 +86,7 @@ BFIDT-005:CTACAACGGC</pre>
 </div>
 <p>Once all that&#8217;s done, you may want to start up <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a> in a <a class="reference external" href="http://www.gnu.org/software/screen/">screen</a> or
 <a class="reference external" href="http://tmux.sourceforge.net/">tmux</a> session by running:</p>
-<div class="highlight-bash"><div class="highlight"><pre>python dmux.py r1.fastq.gz r2.fastq.gz r3.fastq.gz <span class="se">\</span>
+<div class="highlight-bash"><div class="highlight"><pre>python splitaake.py r1.fastq.gz r2.fastq.gz r3.fastq.gz <span class="se">\</span>
                 my-test-file.conf --section L007
 </pre></div>
 </div>
@@ -109,12 +109,108 @@ something similar to a directory containing your reads data in fastq format:</p>
                         BFIDT-004.fastq.gz
                         BFIDT-005.fastq.gz</pre>
 </div>
-<p>In the above, the reasd from the original files <cite>r1.fastq.gz</cite>, <cite>r2.fastq.gz</cite>,
-<cite>r2.fastq.gz</cite> have been split into their component parts - with each name in the
-configuration file above becoming its own gzip file of results.</p>
+<p>In the above, the reads from the original files <tt class="docutils literal"><span class="pre">r1.fastq.gz</span></tt>,
+<tt class="docutils literal"><span class="pre">r2.fastq.gz</span></tt>, <tt class="docutils literal"><span class="pre">r2.fastq.gz</span></tt>, which reside in <tt class="docutils literal"><span class="pre">/Data/L007</span></tt> have been split
+into their component parts - with each name in the configuration file above
+becoming its own <a class="reference external" href="http://www.gzip.org/">gzip</a> file of results.</p>
+<p>Additionally, your resulting, demutliplexed files will be named however you
+setup the configuration file (e.g. <tt class="docutils literal"><span class="pre">my-test-file.conf</span></tt>).  If you had created
+that file as follows:</p>
+<div class="highlight-python"><pre>[bins]
+#name:sequence-tag
+chicken:AACCGAGTTA
+duck:AATACTTCCG
+quail:AATTAAGGCC
+Turkey:AAGCTTATCC</pre>
+</div>
+<p>Then your resulting data would be in <a class="reference external" href="http://www.gzip.org/">gzip</a> files named:</p>
+<div class="highlight-python"><pre>/Data
+        L007/
+                r1.fastq.gz
+                r2.fastq.gz
+                r3.fastq.gz
+                dmux/
+                        chicken.fastq.gz
+                        duck.fastq.gz
+                        quail.fastq.gz
+                        turkey.fastq.gz</pre>
+</div>
 </div>
 <div class="section" id="adapter-and-quality-trimming">
 <h2>Adapter- and quality- trimming<a class="headerlink" href="#adapter-and-quality-trimming" title="Permalink to this headline">¶</a></h2>
+<p>Once you&#8217;ve demultiplexed your reads, you generally need to do some quality
+control on what&#8217;s in each of your names fastq.gzip files.  The reasons for this
+are several-fold.  Generally speaking, you&#8217;re dealing with the fact that the
+ends of some reads tends to be of relatively low quality, and some reads have
+ambiguous bases, which we generally want to avoid.  Finally, some reads, for
+whatever reason, may still have some adapter sequence in the actual read - an
+outcome that you may see referred to as <cite>vector contamination</cite> even though we&#8217;re
+not using vectors.</p>
+<p>Anyway, bottom-line is that we want to do a little trimming on the reads to
+cut off low-quality ends and any left-over adapter that&#8217;s made it&#8217;s way into the
+read.</p>
+<p>As with demultiplexing, there are any number of ways of doing this.  Here are
+some programs that do parts of what you need to do:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://hannonlab.cshl.edu/fastx_toolkit/">FASTX-toolkit</a></li>
+<li></li>
+</ul>
+<p>You may also be interested in doing a little pre-trimming visualization to get
+an idea of how things are looking - always the best way to make decisions.  For
+that, <a class="reference external" href="http://vincebuffalo.com/">Vince Buffalo</a> has a pretty bad-ass slice of code named <a class="reference external" href="https://github.com/vsbuffalo/qrqc">qrqc</a> (see
+figure above).</p>
+<p>Because there are several steps, I generally automate this process using some
+code I wrote called <a class="reference external" href="https://github.com/faircloth-lab/illumiprocessor/">illumiprocessor</a> - it&#8217;s basically a bit of code that just
+runs the component parts of this process that I want to run, outputting some
+stats and other goodies that we&#8217;ll use later.</p>
+<p>Additionally, <a class="reference external" href="https://github.com/faircloth-lab/illumiprocessor/">illumiprocessor</a> sets up a directory structure that we&#8217;ll use
+during the rest of our analyses - so you&#8217;ll be ready to go once it&#8217;s done
+running.  Please feel free to use whichever program/script that you prefer. The
+final directory structure you need to make things run smoothly once QC is
+finished looks like:</p>
+<div class="highlight-python"><pre>chicken/
+        chicken.fastq.gz
+        chicken.fastq-trimmed.gz
+        chicken.stats.txt
+duck/
+        duck.fastq.gz
+        duck.fastq-trimmed.gz
+        duck.stats.txt
+quail/
+        quail.fastq.gz
+        quail.fastq-trimmed.gz
+        quail.stats.txt</pre>
+</div>
+<p>If you setup a configuration file for <a class="reference external" href="https://github.com/faircloth-lab/splitaake/">splitaake</a> above, then we&#8217;re just going
+to add some bits to it.  If you don&#8217;t have a config file, then we need to set
+one up.  This is not terribly bad:</p>
+<div class="highlight-python"><pre>[io]
+input:
+output:
+
+[steps]
+trim:True
+clip:True
+ns:True
+stats:True
+
+[jobs]
+cores:Auto
+
+[bins]
+#name:sequence-tag
+BFIDT-000:AACCGAGTTA
+BFIDT-001:AATACTTCCG
+BFIDT-002:AATTAAGGCC
+BFIDT-003:AAGCTTATCC
+BFIDT-004:CTAACGATCG
+BFIDT-005:CTACAACGGC</pre>
+</div>
+<p>One that&#8217;s done, we&#8217;re ready to rock.  The analysis will run on multiple cores
+if you have them and <tt class="docutils literal"><span class="pre">cores</span></tt> above is set to AUTO.  If <tt class="docutils literal"><span class="pre">cores</span></tt> is set to an
+integer value, the code will use that many cores to analyze your data.  There
+are more complex options available, so check the documentation for
+<a class="reference external" href="https://github.com/faircloth-lab/illumiprocessor/">illumiprocessor</a> if you want to get fancy.</p>
 </div>
 </div>
 
@@ -136,7 +232,7 @@ configuration file above becoming its own gzip file of results.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="study-design.html" title="previous chapter">Study design</a></li>
-      <li>Next: <a href="uce-processing.html" title="next chapter">&lt;no title&gt;</a></li>
+      <li>Next: <a href="next-steps.html" title="next chapter">Two roads diverged in a yellow wood</a></li>
   </ul></li>
 </ul>
   <h3>This Page</h3>

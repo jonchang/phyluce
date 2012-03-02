@@ -1,0 +1,11 @@
+Two roads diverged in a yellow wood
+===================================
+
+Now, we've got several choices to make, each of which determines the path we'll
+be taking for our analyses.  To pick your own ending, click what you want to do
+below.  If you're not sure, read on below the list:
+
+* phylogenomics (UCE loci)
+* population genetics (UCE SNPs)
+* phylogegraphy (sort of both)
+* genome-enabled taxa

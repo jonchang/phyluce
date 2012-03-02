@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Processing data for phylogenetic studies &mdash; phyluce v0.1.0 documentation</title>
+    <title>Assembly for phylogenetic studies &mdash; phyluce v0.1.0 documentation</title>
     <link rel="stylesheet" href="_static/flasky.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -22,8 +22,6 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="phyluce v0.1.0 documentation" href="index.html" />
-    <link rel="next" title="Processing data for population genetic studies" href="snp-processing.html" />
-    <link rel="prev" title="Assembly for phylogenetic studies" href="assembly.html" />
    
   
   <link media="only screen and (max-device-width: 480px)" href="_static/small_flask.css" type= "text/css" rel="stylesheet" />
@@ -36,12 +34,6 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="snp-processing.html" title="Processing data for population genetic studies"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="assembly.html" title="Assembly for phylogenetic studies"
-             accesskey="P">previous</a> |</li>
         <li><a href="index.html">phyluce v0.1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -51,8 +43,31 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="processing-data-for-phylogenetic-studies">
-<h1>Processing data for phylogenetic studies<a class="headerlink" href="#processing-data-for-phylogenetic-studies" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="assembly-for-phylogenetic-studies">
+<h1>Assembly for phylogenetic studies<a class="headerlink" href="#assembly-for-phylogenetic-studies" title="Permalink to this headline">¶</a></h1>
+<p>For phylogenetic/phylogenomic studies, we need to assemble our trimmed reads
+into contigs on a <strong>per-bin basis</strong>, referring back to the bins set setup during
+trimming.  A bin is almost always one-individual&#8217;s worth of data.</p>
+<p>When we talk about assembly, we generally mean that we want to take the whole
+bunch of reads we generated during sequence capture and assemble those into
+&#8220;contigs&#8221; or contiguous blocks of sequence.  So, we want to do something like
+the following:</p>
+<p>&lt;insert assembly image&gt;</p>
+<p>It&#8217;s important to note that we&#8217;re assembline contigs while <strong>blind</strong> to the UCE
+loci from which individual reads may have been derived.  The primer reason we&#8217;re
+doing this is because, if things worked as planned, we will have collected
+reads from our taxa that do not directly overlap the UCE region we&#8217;ve targeted:</p>
+<p>&lt;insert overlap image&gt;</p>
+<p>As with everything in life, we have several assembly choices.  The two &#8220;best&#8221;
+choices for <em>de-novo</em> assembly, in my opinion, are Velvet [] and ABySS []. I
+tend to tell people to use Velvet, largely because of the excellent
+VelvetOptimizer script, so I&#8217;ll cover Velvet first.</p>
+<div class="section" id="velvet">
+<h2>Velvet<a class="headerlink" href="#velvet" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="abyss">
+<h2>ABySS<a class="headerlink" href="#abyss" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -60,16 +75,23 @@
         </div>
       </div>
       <div class="sphinxsidebar">
-        <div class="sphinxsidebarwrapper"><h3>Related Topics</h3>
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Assembly for phylogenetic studies</a><ul>
+<li><a class="reference internal" href="#velvet">Velvet</a></li>
+<li><a class="reference internal" href="#abyss">ABySS</a></li>
+</ul>
+</li>
+</ul>
+<h3>Related Topics</h3>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="assembly.html" title="previous chapter">Assembly for phylogenetic studies</a></li>
-      <li>Next: <a href="snp-processing.html" title="next chapter">Processing data for population genetic studies</a></li>
   </ul></li>
 </ul>
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/uce-processing.txt"
+    <li><a href="_sources/assembly.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">

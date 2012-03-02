@@ -1,8 +1,6 @@
-#####################
 Data Pre-processing
-#####################
+======================
 
-**************
 Demultiplexing
 **************
 
@@ -17,7 +15,7 @@ are working.  Thankfully, demultiplexing (or "demuxing") Illumina reads is
 rather simple. There are several options:
 
 * the Illumina pipeline
-* `fastx-tools <>`_
+* `FASTX-toolkit`_
 
 I have also written `splitaake`_, which is a program to help demultiplex
 Illumina reads.  `splitaake`_ is particularly useful when you have very many
@@ -25,9 +23,9 @@ sequence tags (aka "barcodes") to demultiplex, when your sequence tags are
 long, or some combination of the two.
 
 To demultiplex your data with `splitaake`_, you need a couple of things - first
-you need to `install splitaake <>`_.  Second, you need to create a configuration
-file (e.g. my-test-file.conf) for `splitaake`_ that relates your sequence tags
-to their samples.  Here  is an example:
+you need to `install splitaake`_.  Second, you need to create a configuration
+file (e.g. ``my-test-file.conf``) for `splitaake`_ that relates your sequence
+tags to their samples.  Here  is an example:
 
 .. code-block:: python
 
@@ -45,7 +43,7 @@ Once all that's done, you may want to start up `splitaake`_ in a `screen`_ or
 
 .. code-block:: bash
 
-	python dmux.py r1.fastq.gz r2.fastq.gz r3.fastq.gz \
+	python splitaake.py r1.fastq.gz r2.fastq.gz r3.fastq.gz \
 			my-test-file.conf --section L007
 
 This can take a rather long time for a single lane of 150-190 million Illumina
@@ -69,9 +67,36 @@ something similar to a directory containing your reads data in fastq format::
 				BFIDT-004.fastq.gz
 				BFIDT-005.fastq.gz
 
-In the above, the reasd from the original files `r1.fastq.gz`, `r2.fastq.gz`, 
-`r2.fastq.gz` have been split into their component parts - with each name in the
-configuration file above becoming its own gzip file of results.
+In the above, the reads from the original files ``r1.fastq.gz``,
+``r2.fastq.gz``, ``r2.fastq.gz``, which reside in ``/Data/L007`` have been split
+into their component parts - with each name in the configuration file above
+becoming its own `gzip`_ file of results.
+
+Additionally, your resulting, demutliplexed files will be named however you
+setup the configuration file (e.g. ``my-test-file.conf``).  If you had created
+that file as follows:
+
+.. code-block:: python
+
+	[bins]
+	#name:sequence-tag
+	chicken:AACCGAGTTA
+	duck:AATACTTCCG
+	quail:AATTAAGGCC
+	Turkey:AAGCTTATCC
+
+Then your resulting data would be in `gzip`_ files named::
+
+	/Data
+		L007/
+			r1.fastq.gz
+			r2.fastq.gz
+			r3.fastq.gz
+			dmux/
+				chicken.fastq.gz
+				duck.fastq.gz
+				quail.fastq.gz
+				turkey.fastq.gz
 
 
 .. _splitaake: https://github.com/faircloth-lab/splitaake/
@@ -79,6 +104,94 @@ configuration file above becoming its own gzip file of results.
 .. _tmux: http://tmux.sourceforge.net/
 .. _gzip: http://www.gzip.org/
 
-******************************
 Adapter- and quality- trimming
 ******************************
+
+Once you've demultiplexed your reads, you generally need to do some quality
+control on what's in each of your names fastq.gzip files.  The reasons for this
+are several-fold.  Generally speaking, you're dealing with the fact that the
+ends of some reads tends to be of relatively low quality, and some reads have
+ambiguous bases, which we generally want to avoid.  Finally, some reads, for
+whatever reason, may still have some adapter sequence in the actual read - an
+outcome that you may see referred to as `vector contamination` even though we're
+not using vectors.
+
+Anyway, bottom-line is that we want to do a little trimming on the reads to
+cut off low-quality ends and any left-over adapter that's made it's way into the
+read.
+
+As with demultiplexing, there are any number of ways of doing this.  Here are
+some programs that do parts of what you need to do:
+
+* `FASTX-toolkit`_
+* 
+
+You may also be interested in doing a little pre-trimming visualization to get
+an idea of how things are looking - always the best way to make decisions.  For
+that, `Vince Buffalo`_ has a pretty bad-ass slice of code named `qrqc`_ (see
+figure above).
+
+Because there are several steps, I generally automate this process using some
+code I wrote called `illumiprocessor`_ - it's basically a bit of code that just
+runs the component parts of this process that I want to run, outputting some
+stats and other goodies that we'll use later.
+
+Additionally, `illumiprocessor`_ sets up a directory structure that we'll use
+during the rest of our analyses - so you'll be ready to go once it's done
+running.  Please feel free to use whichever program/script that you prefer. The
+final directory structure you need to make things run smoothly once QC is
+finished looks like::
+
+	chicken/
+		chicken.fastq.gz
+		chicken.fastq-trimmed.gz
+		chicken.stats.txt
+	duck/
+		duck.fastq.gz
+		duck.fastq-trimmed.gz
+		duck.stats.txt
+	quail/
+		quail.fastq.gz
+		quail.fastq-trimmed.gz
+		quail.stats.txt
+
+If you setup a configuration file for `splitaake`_ above, then we're just going
+to add some bits to it.  If you don't have a config file, then we need to set
+one up.  This is not terribly bad:
+
+.. code-block:: python
+	
+	[io]
+	input:
+	output:
+
+	[steps]
+	trim:True
+	clip:True
+	ns:True
+	stats:True
+
+	[jobs]
+	cores:Auto
+
+	[bins]
+	#name:sequence-tag
+	BFIDT-000:AACCGAGTTA
+	BFIDT-001:AATACTTCCG
+	BFIDT-002:AATTAAGGCC
+	BFIDT-003:AAGCTTATCC
+	BFIDT-004:CTAACGATCG
+	BFIDT-005:CTACAACGGC
+
+One that's done, we're ready to rock.  The analysis will run on multiple cores
+if you have them and ``cores`` above is set to AUTO.  If ``cores`` is set to an
+integer value, the code will use that many cores to analyze your data.  There
+are more complex options available, so check the documentation for
+`illumiprocessor`_ if you want to get fancy.
+
+
+.. _illumiprocessor: https://github.com/faircloth-lab/illumiprocessor/
+.. _qrqc: https://github.com/vsbuffalo/qrqc
+.. _Vince Buffalo: http://vincebuffalo.com/
+.. _FASTX-toolkit: http://hannonlab.cshl.edu/fastx_toolkit/
+

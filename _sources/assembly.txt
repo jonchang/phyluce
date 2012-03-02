@@ -1,0 +1,34 @@
+Assembly for phylogenetic studies
+=================================
+
+For phylogenetic/phylogenomic studies, we need to assemble our trimmed reads
+into contigs on a **per-bin basis**, referring back to the bins set setup during
+trimming.  A bin is almost always one-individual's worth of data. 
+
+When we talk about assembly, we generally mean that we want to take the whole
+bunch of reads we generated during sequence capture and assemble those into
+"contigs" or contiguous blocks of sequence.  So, we want to do something like
+the following:
+
+<insert assembly image>
+
+It's important to note that we're assembline contigs while **blind** to the UCE
+loci from which individual reads may have been derived.  The primer reason we're
+doing this is because, if things worked as planned, we will have collected
+reads from our taxa that do not directly overlap the UCE region we've targeted:
+
+<insert overlap image>
+
+As with everything in life, we have several assembly choices.  The two "best"
+choices for *de-novo* assembly, in my opinion, are Velvet [] and ABySS []. I
+tend to tell people to use Velvet, largely because of the excellent
+VelvetOptimizer script, so I'll cover Velvet first.
+
+******
+Velvet
+******
+
+
+*****
+ABySS
+*****
